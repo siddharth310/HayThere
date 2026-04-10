@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Survey {
+  id          String @id @default(cuid())
+  slug        String @unique
+  title       String
+  description String?
+  status      String @default("DRAFT") // DRAFT | PUBLISHED
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  questions   SurveyQuestion[]
+  responses   SurveyResponse[]
+}
+
+model SurveyQuestion {
+  id              String   @id @default(cuid())
+  surveyId        String
+  survey          Survey   @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  orderIndex      Int
+  prompt          String
+  type            String // DROPDOWN | CHECKBOX | TEXT
+  optionsJson     String?
+  audioOnly       Boolean  @default(false)
+  promptAudioPath String?
+  locales         QuestionLocale[]
+  answers         Answer[]
+
+  @@index([surveyId])
+}
+
+model QuestionLocale {
+  id              String   @id @default(cuid())
+  questionId      String
+  question        SurveyQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  locale          String
+  prompt          String
+  optionsJson     String?
+  promptAudioPath String?
+
+  @@unique([questionId, locale])
+}
+
+model SurveyResponse {
+  id        String   @id @default(cuid())
+  surveyId  String
+  survey    Survey   @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  locale    String
+  createdAt DateTime @default(now())
+  answers   Answer[]
+
+  @@index([surveyId])
+}
+
+model Answer {
+  id             String   @id @default(cuid())
+  responseId     String
+  response       SurveyResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  questionId     String
+  question       SurveyQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  valueJson      String?
+  audioPath      String?
+  transcriptRaw  String?
+  transcriptEn   String?
+
+  @@index([responseId])
+}
