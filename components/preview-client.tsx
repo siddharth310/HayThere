@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { QuestionWithLocales } from "@/lib/survey-display";
+import { QuestionAudioPlayer } from "@/components/question-audio-player";
 import { getPromptAudioPath, getQuestionCopy } from "@/lib/survey-display";
 import { SUPPORTED_LOCALES } from "@/lib/locales";
 
@@ -52,19 +53,17 @@ export function PreviewClient({
               Question {i + 1} · {q.type}
               {q.audioOnly ? " · audio only" : ""}
             </p>
-            {q.promptAudio ? (
-              <div className="mt-2 rounded-lg border border-slate-200 bg-sky-50/80 p-3">
-                <p className="text-xs font-medium uppercase text-slate-500">
-                  Play question
-                </p>
-                <audio
-                  className="mt-2 w-full max-w-md"
-                  controls
-                  preload="metadata"
-                  src={`/api/uploads/${q.promptAudio}`}
-                />
-              </div>
-            ) : null}
+            <div className="mt-2">
+              <QuestionAudioPlayer
+                fileSrc={
+                  q.promptAudio
+                    ? `/api/uploads/${q.promptAudio}`
+                    : null
+                }
+                readAloudText={q.prompt}
+                locale={locale}
+              />
+            </div>
             <p className="mt-2 text-base font-medium">{q.prompt}</p>
             {q.type === "DROPDOWN" && (
               <ul className="mt-3 list-disc pl-5 text-sm text-slate-500">

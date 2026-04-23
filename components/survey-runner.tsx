@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { submitResponse } from "@/app/actions/response";
 import type { QuestionWithLocales } from "@/lib/survey-display";
+import { QuestionAudioPlayer } from "@/components/question-audio-player";
 import { getPromptAudioPath, getQuestionCopy } from "@/lib/survey-display";
 
 type Props = {
@@ -157,19 +158,15 @@ export function SurveyRunner({ surveyId, locale, questions }: Props) {
             key={q.id}
             className="rounded-xl border border-slate-200 bg-white p-4"
           >
-            {promptAudio ? (
-              <div className="mb-3 rounded-lg border border-slate-200 bg-sky-50/80 p-3">
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                  Play question
-                </p>
-                <audio
-                  className="mt-2 w-full max-w-md"
-                  controls
-                  preload="metadata"
-                  src={`/api/uploads/${promptAudio}`}
-                />
-              </div>
-            ) : null}
+            <div className="mb-3">
+              <QuestionAudioPlayer
+                fileSrc={
+                  promptAudio ? `/api/uploads/${promptAudio}` : null
+                }
+                readAloudText={copy.prompt}
+                locale={locale}
+              />
+            </div>
             <p className="text-base font-medium">{copy.prompt}</p>
             {q.audioOnly ? (
               <AudioBlock
