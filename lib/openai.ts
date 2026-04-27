@@ -1,4 +1,4 @@
-import OpenAI from "openai";
+import OpenAI, { toFile } from "openai";
 import { saveQuestionAudioBuffer } from "@/lib/uploads";
 import type { LocaleCode } from "./locales";
 
@@ -114,14 +114,17 @@ export async function synthesizeSpeechToMp3Path(text: string): Promise<string> {
 }
 
 export async function transcribeAudio(
-  filePath: string,
-  _mimeType: string,
+  buffer: Buffer,
+  mimeType: string,
+  filename = "answer.webm",
 ): Promise<string> {
   const client = getClient();
-  const fs = await import("node:fs");
+  const file = await toFile(buffer, filename, {
+    type: mimeType || "audio/webm",
+  });
 
   const tr = await client.audio.transcriptions.create({
-    file: fs.createReadStream(filePath),
+    file,
     model: "whisper-1",
   });
 

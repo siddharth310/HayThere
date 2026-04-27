@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { transcribeAudio, translateToEnglish } from "@/lib/openai";
-import { absoluteUploadPath, saveAudioBuffer } from "@/lib/uploads";
+import { saveAudioBuffer } from "@/lib/uploads";
 import type { QuestionType } from "@/lib/question-types";
 
 type AnswerPayload =
@@ -59,8 +59,11 @@ export async function submitResponse(formData: FormData) {
       const ext = pickExt(audio.type, audio.name);
       const rel = await saveAudioBuffer(buf, ext);
       audioPath = rel;
-      const abs = absoluteUploadPath(rel);
-      transcriptRaw = await transcribeAudio(abs, audio.type || "audio/webm");
+      transcriptRaw = await transcribeAudio(
+        buf,
+        audio.type || "audio/webm",
+        audio.name || `answer${ext}`,
+      );
       transcriptEn = await translateToEnglish(transcriptRaw, locale);
 
       const merged = mergeAudioWithPayload(

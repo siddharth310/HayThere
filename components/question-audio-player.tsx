@@ -30,7 +30,8 @@ export function QuestionAudioPlayer({
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    setHydrated(true);
+    const id = window.setTimeout(() => setHydrated(true), 0);
+    return () => window.clearTimeout(id);
   }, []);
 
   const canSpeak =
@@ -55,16 +56,12 @@ export function QuestionAudioPlayer({
   }, []);
 
   useEffect(() => {
-    stopFile();
-    stopSpeech();
-  }, [fileSrc, stopFile, stopSpeech]);
-
-  useEffect(() => {
     return () => {
-      stopFile();
-      stopSpeech();
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
     };
-  }, [stopFile, stopSpeech]);
+  }, []);
 
   useEffect(() => {
     const el = audioRef.current;

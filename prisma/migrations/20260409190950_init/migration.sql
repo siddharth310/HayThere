@@ -1,54 +1,64 @@
 -- CreateTable
 CREATE TABLE "Survey" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "description" TEXT,
     "status" TEXT NOT NULL DEFAULT 'DRAFT',
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Survey_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "SurveyQuestion" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "surveyId" TEXT NOT NULL,
     "orderIndex" INTEGER NOT NULL,
     "prompt" TEXT NOT NULL,
     "type" TEXT NOT NULL,
     "optionsJson" TEXT,
     "audioOnly" BOOLEAN NOT NULL DEFAULT false,
+
+    CONSTRAINT "SurveyQuestion_pkey" PRIMARY KEY ("id"),
     CONSTRAINT "SurveyQuestion_surveyId_fkey" FOREIGN KEY ("surveyId") REFERENCES "Survey" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- CreateTable
 CREATE TABLE "QuestionLocale" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "questionId" TEXT NOT NULL,
     "locale" TEXT NOT NULL,
     "prompt" TEXT NOT NULL,
     "optionsJson" TEXT,
+
+    CONSTRAINT "QuestionLocale_pkey" PRIMARY KEY ("id"),
     CONSTRAINT "QuestionLocale_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "SurveyQuestion" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- CreateTable
 CREATE TABLE "SurveyResponse" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "surveyId" TEXT NOT NULL,
     "locale" TEXT NOT NULL,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "SurveyResponse_pkey" PRIMARY KEY ("id"),
     CONSTRAINT "SurveyResponse_surveyId_fkey" FOREIGN KEY ("surveyId") REFERENCES "Survey" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- CreateTable
 CREATE TABLE "Answer" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "responseId" TEXT NOT NULL,
     "questionId" TEXT NOT NULL,
     "valueJson" TEXT,
     "audioPath" TEXT,
     "transcriptRaw" TEXT,
     "transcriptEn" TEXT,
+
+    CONSTRAINT "Answer_pkey" PRIMARY KEY ("id"),
     CONSTRAINT "Answer_responseId_fkey" FOREIGN KEY ("responseId") REFERENCES "SurveyResponse" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "Answer_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "SurveyQuestion" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
