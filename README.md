@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# HayThere Field Force
+
+HayThere is a full-stack Next.js app for voice-first field surveys, portal
+management, multilingual question audio, field training videos, and auditable
+responses.
 
 ## Getting Started
 
-First, run the development server:
+1. Copy environment defaults:
+
+```bash
+cp .env.example .env
+```
+
+2. Set a PostgreSQL `DATABASE_URL`, `OPENAI_API_KEY`, and optional
+   `PORTAL_PASSWORD`.
+
+3. Install dependencies and prepare the database:
+
+```bash
+npm ci
+npm run db:migrate
+```
+
+4. Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `npm run dev` - local development server.
+- `npm run build` - Prisma generate + production build.
+- `npm run start` - production Next.js server.
+- `npm run start:ec2` - apply migrations, then start on `0.0.0.0`.
+- `npm run db:migrate` - local Prisma development migration.
+- `npm run db:deploy` - production migration deployment.
+- `npm run lint` - ESLint.
 
-## Learn More
+## Required Production Services
 
-To learn more about Next.js, take a look at the following resources:
+- PostgreSQL database (RDS, Neon, Supabase, etc.).
+- S3 bucket for audio uploads.
+- OpenAI API key.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## AWS Deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+This repo supports two AWS paths:
 
-## Deploy on Vercel
+- Amplify Hosting: see `docs/amplify-deployment.md`.
+- EC2 as a single full-stack app: see `docs/ec2-deployment.md`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+For EC2, you can run directly with Node/systemd or with the included
+`Dockerfile`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Health Check
+
+Use this route for ALB/Nginx/monitoring checks:
+
+```bash
+curl http://localhost:3000/api/health
+```
+
+## Environment Variables
+
+See `.env.example`. Do not commit real `.env` files.
+
+Key variables:
+
+- `DATABASE_URL`
+- `OPENAI_API_KEY`
+- `S3_UPLOAD_BUCKET`
+- `S3_UPLOAD_REGION`
+- `PORTAL_PASSWORD` (optional but recommended)
+
+## Notes
+
+- SQLite is no longer used; production and local dev should use PostgreSQL.
+- When `S3_UPLOAD_BUCKET` is set, uploads are stored in S3.
+- If `S3_UPLOAD_BUCKET` is not set, uploads fall back to local `uploads/`
+  storage, which is only suitable for local/dev or a single persistent EC2 disk.

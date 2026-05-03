@@ -1,0 +1,20 @@
+[Unit]
+Description=HayThere Next.js app
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/haythere
+EnvironmentFile=/opt/haythere/.env
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/npm run start:ec2
+Restart=always
+RestartSec=10
+SyslogIdentifier=haythere
+
+# Keep the service isolated without blocking network/database/S3 access.
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
