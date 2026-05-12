@@ -57,14 +57,24 @@ export function PublishControls({
             {pending ? "Working…" : "Publish & translate"}
           </button>
         ) : (
-          <button
-            type="button"
-            disabled={pending}
-            onClick={unpublish}
-            className="rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50"
-          >
-            {pending ? "Working…" : "Unpublish"}
-          </button>
+          <>
+            <button
+              type="button"
+              disabled={pending}
+              onClick={publish}
+              className="rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:brightness-105 disabled:opacity-60"
+            >
+              {pending ? "Working…" : "Regenerate translations"}
+            </button>
+            <button
+              type="button"
+              disabled={pending}
+              onClick={unpublish}
+              className="rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50 disabled:opacity-60"
+            >
+              {pending ? "Working…" : "Unpublish"}
+            </button>
+          </>
         )}
       </div>
       <p className="text-xs text-slate-600">
