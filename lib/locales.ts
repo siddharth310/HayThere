@@ -3,8 +3,8 @@ export const SUPPORTED_LOCALES = [
   { code: "hi", label: "Hindi" },
   { code: "ta", label: "Tamil" },
   { code: "te", label: "Telugu" },
-  { code: "bn", label: "Bengali" },
-  { code: "or", label: "Odia" },
+  { code: "fr", label: "French" },
+  { code: "es", label: "Spanish" },
 ] as const;
 
 export type LocaleCode = (typeof SUPPORTED_LOCALES)[number]["code"];
@@ -23,8 +23,8 @@ export function bcp47ForSpeechLocale(code: string): string {
     hi: "hi-IN",
     ta: "ta-IN",
     te: "te-IN",
-    bn: "bn-IN",
-    or: "or-IN",
+    fr: "fr-FR",
+    es: "es-ES",
   };
   return map[code] ?? "en-US";
 }

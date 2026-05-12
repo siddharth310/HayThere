@@ -4,7 +4,9 @@ import { PageIntro } from "@/components/page-intro";
 import { prisma } from "@/lib/prisma";
 import {
   extractAnswerValueDisplay,
+  extractNumericAnswerDisplay,
   type AnswerValueDisplay,
+  type NumericAnswerDisplay,
 } from "@/lib/answer-display";
 import { localeLabel } from "@/lib/locales";
 
@@ -71,7 +73,7 @@ export default async function SurveyResponsesPage({ params }: PageProps) {
                   {questions.map((q, i) => (
                     <th
                       key={q.id}
-                      colSpan={2}
+                      colSpan={3}
                       className="border-r border-slate-200 px-3 py-3 text-center text-xs font-semibold text-slate-900 last:border-r-0"
                       title={q.prompt}
                     >
@@ -87,6 +89,9 @@ export default async function SurveyResponsesPage({ params }: PageProps) {
                     <Fragment key={q.id}>
                       <th className="min-w-[140px] border-r border-slate-200 px-2 py-2 text-center text-[10px] font-semibold uppercase tracking-wide text-slate-500">
                         Value
+                      </th>
+                      <th className="min-w-[110px] border-r border-slate-200 px-2 py-2 text-center text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                        Number
                       </th>
                       <th className="min-w-[160px] border-r border-slate-200 px-2 py-2 text-center text-[10px] font-semibold uppercase tracking-wide text-slate-500 last:border-r-0">
                         Answer audio
@@ -114,6 +119,9 @@ export default async function SurveyResponsesPage({ params }: PageProps) {
                       const valueDisp = a
                         ? extractAnswerValueDisplay(a.valueJson)
                         : ({ kind: "empty" } satisfies AnswerValueDisplay);
+                      const numericDisp = a
+                        ? extractNumericAnswerDisplay(a.valueJson)
+                        : ({ kind: "empty" } satisfies NumericAnswerDisplay);
                       return [
                         <td
                           key={`${r.id}-${q.id}-v`}
@@ -121,6 +129,16 @@ export default async function SurveyResponsesPage({ params }: PageProps) {
                         >
                           {a ? (
                             <ValueCell display={valueDisp} />
+                          ) : (
+                            <span className="text-slate-400">—</span>
+                          )}
+                        </td>,
+                        <td
+                          key={`${r.id}-${q.id}-n`}
+                          className="border-r border-slate-200 px-2 py-2 align-top text-xs"
+                        >
+                          {a ? (
+                            <NumericCell display={numericDisp} />
                           ) : (
                             <span className="text-slate-400">—</span>
                           )}
@@ -149,6 +167,17 @@ export default async function SurveyResponsesPage({ params }: PageProps) {
           </div>
         )}
     </>
+  );
+}
+
+function NumericCell({ display }: { display: NumericAnswerDisplay }) {
+  if (display.kind === "empty") {
+    return <span className="text-slate-400">—</span>;
+  }
+  return (
+    <span className="font-mono tabular-nums text-slate-900">
+      {display.display}
+    </span>
   );
 }
 

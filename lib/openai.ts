@@ -15,8 +15,8 @@ const LOCALE_NAMES: Record<LocaleCode, string> = {
   hi: "Hindi",
   ta: "Tamil",
   te: "Telugu",
-  bn: "Bengali",
-  or: "Odia",
+  fr: "French",
+  es: "Spanish",
 };
 
 /** Translate question prompt and options from English into target locale. */

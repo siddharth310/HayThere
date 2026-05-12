@@ -154,10 +154,6 @@ export async function publishSurvey(surveyId: string) {
   });
   if (!survey) throw new Error("Survey not found");
 
-  await prisma.questionLocale.deleteMany({
-    where: { question: { surveyId } },
-  });
-
   await prisma.surveyQuestion.updateMany({
     where: { surveyId },
     data: { promptAudioPath: null },
@@ -166,6 +162,13 @@ export async function publishSurvey(surveyId: string) {
   const nonEnglishLocales = SUPPORTED_LOCALES.filter(
     (l) => l.code !== "en",
   ).map((l) => l.code as LocaleCode);
+
+  await prisma.questionLocale.deleteMany({
+    where: {
+      question: { surveyId },
+      locale: { notIn: nonEnglishLocales },
+    },
+  });
 
   for (const q of survey.questions) {
     const opts = parseOptionsJson(q.optionsJson);
@@ -176,12 +179,24 @@ export async function publishSurvey(surveyId: string) {
         opts.length ? opts : null,
         loc,
       );
-      await prisma.questionLocale.create({
-        data: {
+      await prisma.questionLocale.upsert({
+        where: {
+          questionId_locale: {
+            questionId: q.id,
+            locale: loc,
+          },
+        },
+        create: {
           questionId: q.id,
           locale: loc,
           prompt,
           optionsJson: options ? JSON.stringify(options) : null,
+          promptAudioPath: null,
+        },
+        update: {
+          prompt,
+          optionsJson: options ? JSON.stringify(options) : null,
+          promptAudioPath: null,
         },
       });
     }
@@ -192,7 +207,11 @@ export async function publishSurvey(surveyId: string) {
     include: {
       questions: {
         orderBy: { orderIndex: "asc" },
-        include: { locales: true },
+        include: {
+          locales: {
+            where: { locale: { in: nonEnglishLocales } },
+          },
+        },
       },
     },
   });
@@ -209,9 +228,21 @@ export async function publishSurvey(surveyId: string) {
       const path = await synthesizeSpeechToMp3Path(
         scriptForLocaleTts(q.type, row.prompt, row.optionsJson),
       );
-      await prisma.questionLocale.update({
-        where: { id: row.id },
-        data: { promptAudioPath: path },
+      await prisma.questionLocale.upsert({
+        where: {
+          questionId_locale: {
+            questionId: q.id,
+            locale: row.locale as LocaleCode,
+          },
+        },
+        create: {
+          questionId: q.id,
+          locale: row.locale,
+          prompt: row.prompt,
+          optionsJson: row.optionsJson,
+          promptAudioPath: path,
+        },
+        update: { promptAudioPath: path },
       });
     }
   }

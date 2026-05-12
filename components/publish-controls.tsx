@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { publishSurvey, unpublishSurvey } from "@/app/actions/survey";
 
 export function PublishControls({
@@ -12,8 +12,11 @@ export function PublishControls({
 }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const pendingRef = useRef(false);
 
   async function publish() {
+    if (pendingRef.current) return;
+    pendingRef.current = true;
     setPending(true);
     setError(null);
     try {
@@ -21,11 +24,14 @@ export function PublishControls({
     } catch (e) {
       setError(e instanceof Error ? e.message : "Publish failed");
     } finally {
+      pendingRef.current = false;
       setPending(false);
     }
   }
 
   async function unpublish() {
+    if (pendingRef.current) return;
+    pendingRef.current = true;
     setPending(true);
     setError(null);
     try {
@@ -33,6 +39,7 @@ export function PublishControls({
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unpublish failed");
     } finally {
+      pendingRef.current = false;
       setPending(false);
     }
   }
@@ -62,7 +69,7 @@ export function PublishControls({
       </div>
       <p className="text-xs text-slate-600">
         Publishing uses OpenAI to translate prompts/options into Hindi, Tamil,
-        Telugu, Bengali, and Odia. English stays as the source text.
+        Telugu, French, and Spanish. English stays as the source text.
       </p>
       {error && (
         <p className="text-sm font-medium text-red-600">{error}</p>
